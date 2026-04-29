@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMEA Invest — Zins-Update</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Cormorant+Garamond:wght@500&family=Barlow+Condensed:wght@300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --obsidian: #0D1F2D;
+      --midnight: #0A1628;
+      --amber: #C8AA6E;
+      --off-white: #FAFAF8;
+      --slate: #1C2F3E;
+      --steel: #3A4A60;
+      --muted: #8A9AAA;
+      --smaragd: #1B6B4A;
+      --smaragd-light: #22875E;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--obsidian);
+      color: var(--off-white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: var(--slate);
+      border: 1px solid var(--steel);
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    }
+
+    /* ── Logo ── */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .logo-signet {
+      height: 32px;
+      width: auto;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .logo-imea {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 300;
+      font-size: 20px;
+      letter-spacing: 0.22em;
+      color: var(--off-white);
+      text-transform: uppercase;
+    }
+
+    .logo-invest {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 7px;
+      letter-spacing: 0.30em;
+      color: var(--amber);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── Eyebrow ── */
+    .eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+
+    /* ── Headline ── */
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.04em;
+      color: var(--off-white);
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: var(--midnight);
+      border: 1px solid var(--steel);
+      border-radius: 8px;
+      padding: 14px 48px 14px 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 28px;
+      color: var(--off-white);
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--amber);
+    }
+
+    input[type="number"]::placeholder {
+      color: var(--steel);
+      font-size: 24px;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 24px;
+      color: var(--amber);
+      pointer-events: none;
+    }
+
+    /* ── Button ── */
+    .btn-primary {
+      width: 100%;
+      background: var(--amber);
+      color: var(--obsidian);
+      border: none;
+      border-radius: 8px;
+      padding: 15px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover {
+      background: #d4b87a;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Last Value ── */
+    .last-value {
+      margin-top: 28px;
+      padding: 16px;
+      background: var(--midnight);
+      border: 1px solid var(--steel);
+      border-radius: 8px;
+    }
+
+    .last-value-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .last-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .last-value-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 28px;
+      color: var(--amber);
+    }
+
+    .last-value-pct {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 20px;
+      color: var(--amber);
+    }
+
+    .last-value-ts {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Success State ── */
+    .success-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(27, 107, 74, 0.15);
+      border: 1px solid var(--smaragd);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 20px;
+    }
+
+    .success-banner.visible {
+      display: flex;
+    }
+
+    .success-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--smaragd);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .success-icon svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .success-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--off-white);
+    }
+
+    .success-text strong {
+      color: var(--smaragd-light);
+    }
+
+    /* ── Error State ── */
+    .error-banner {
+      display: none;
+      background: rgba(180, 40, 40, 0.15);
+      border: 1px solid #b42828;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: #e57373;
+    }
+
+    .error-banner.visible {
+      display: block;
+    }
+
+    /* ── Loading ── */
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(13,31,45,0.3);
+      border-top-color: var(--obsidian);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .spinner.visible {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--steel);
+      text-transform: uppercase;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+      h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="card">
+
+      <!-- Logo -->
+      <div class="logo">
+        <svg class="logo-signet" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,40 9,27 9,54 0,60" fill="#C8AA6E" opacity="0.33"/>
+          <polygon points="14,25 23,12 23,54 14,62" fill="#C8AA6E" opacity="0.64"/>
+          <polygon points="28,8 37,0 37,60 28,66" fill="#C8AA6E"/>
+        </svg>
+        <div class="logo-text">
+          <span class="logo-imea">IMEA</span>
+          <span class="logo-invest">Invest</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="eyebrow">Finanzierungspartner · Wöchentliches Update</div>
+      <h1>Zins-Update</h1>
+      <p class="subtitle">Aktuelle Durchschnitts-Annuität für diese Woche eintragen. Der Wert fließt automatisch in alle neuen Lead-Scorings ein.</p>
+
+      <!-- Form -->
+      <form id="zinsForm" novalidate>
+        <div class="form-group">
+          <label for="annuitaet">Durchschnitts-Annuität</label>
+          <div class="input-wrapper">
+            <input
+              type="number"
+              id="annuitaet"
+              name="annuitaet"
+              placeholder="5.7"
+              step="0.1"
+              min="0.1"
+              max="20"
+              required
+              autocomplete="off"
+            />
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span id="btnText">Speichern</span>
+          <span class="spinner" id="btnSpinner"></span>
+        </button>
+      </form>
+
+      <!-- Success Banner -->
+      <div class="success-banner" id="successBanner">
+        <div class="success-icon">
+          <svg viewBox="0 0 12 12" fill="none">
+            <path d="M2 6l3 3 5-5" stroke="#FAFAF8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="success-text">
+          Wert gespeichert ✓ — Neue Annuität: <strong id="savedValue">—</strong>
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      <div class="error-banner" id="errorBanner"></div>
+
+      <!-- Last Value -->
+      <div class="last-value" id="lastValueBox">
+        <div class="last-value-label">Letzter gespeicherter Wert</div>
+        <div class="last-value-row">
+          <span class="last-value-number" id="lastValueNum">—</span>
+          <span class="last-value-pct" id="lastValuePctSign"></span>
+        </div>
+        <div class="last-value-ts" id="lastValueTs">Noch kein Wert gespeichert</div>
+      </div>
+
+    </div>
+
+    <div class="footer">IMEA CORE &nbsp;·&nbsp; Intern &nbsp;·&nbsp; Vertraulich</div>
+  </div>
+
+  <script>
+    // ── Config ──
+    // Der Webhook-Server-URL wird über ein globales Konfig-Objekt gesetzt,
+    // damit er bei Railway-Deployment einfach angepasst werden kann.
+    const CONFIG = {
+      webhookBase: window.IMEA_WEBHOOK_URL || 'https://imea-webhook-production.up.railway.app'
+    };
+
+    // ── DOM refs ──
+    const form       = document.getElementById('zinsForm');
+    const input      = document.getElementById('annuitaet');
+    const submitBtn  = document.getElementById('submitBtn');
+    const btnText    = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const successBanner = document.getElementById('successBanner');
+    const savedValue    = document.getElementById('savedValue');
+    const errorBanner   = document.getElementById('errorBanner');
+    const lastValueNum  = document.getElementById('lastValueNum');
+    const lastValuePctSign = document.getElementById('lastValuePctSign');
+    const lastValueTs   = document.getElementById('lastValueTs');
+
+    // ── Load current value on page load ──
+    async function loadCurrentValue() {
+      try {
+        const res = await fetch(`${CONFIG.webhookBase}/zins/current`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.value !== undefined && data.value !== null) {
+          lastValueNum.textContent = formatAnnuitaet(data.value);
+          lastValuePctSign.textContent = '%';
+          lastValueTs.textContent = data.updated_at
+            ? 'Gespeichert am ' + formatTimestamp(data.updated_at)
+            : 'Startwert';
+        }
+      } catch (e) {
+        // Silently fail — last value display is non-critical
+      }
+    }
+
+    // ── Form submit ──
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+
+      const raw = input.value.trim();
+      const val = parseFloat(raw.replace(',', '.'));
+
+      if (isNaN(val) || val <= 0 || val > 20) {
+        showError('Bitte einen gültigen Wert zwischen 0,1 und 20 eingeben (z.B. 5.7).');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(`${CONFIG.webhookBase}/webhook/zins-update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ annuitaet: val })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || 'Fehler beim Speichern. Bitte erneut versuchen.');
+          return;
+        }
+
+        // Update last value display
+        lastValueNum.textContent = formatAnnuitaet(data.value);
+        lastValuePctSign.textContent = '%';
+        lastValueTs.textContent = 'Gespeichert am ' + formatTimestamp(data.updated_at);
+
+        // Show success
+        savedValue.textContent = formatAnnuitaet(data.value) + ' %';
+        successBanner.classList.add('visible');
+
+        // Reset input
+        input.value = '';
+
+      } catch (err) {
+        showError('Verbindungsfehler. Bitte Internetverbindung prüfen und erneut versuchen.');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // ── Helpers ──
+    function setLoading(state) {
+      submitBtn.disabled = state;
+      btnText.style.display = state ? 'none' : 'inline';
+      btnSpinner.classList.toggle('visible', state);
+    }
+
+    function hideMessages() {
+      successBanner.classList.remove('visible');
+      errorBanner.classList.remove('visible');
+      errorBanner.textContent = '';
+    }
+
+    function showError(msg) {
+      errorBanner.textContent = msg;
+      errorBanner.classList.add('visible');
+    }
+
+    function formatAnnuitaet(val) {
+      return parseFloat(val).toFixed(2).replace('.', ',');
+    }
+
+    function formatTimestamp(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('de-DE', {
+          day: '2-digit', month: '2-digit', year: 'numeric'
+        }) + ' · ' + d.toLocaleTimeString('de-DE', {
+          hour: '2-digit', minute: '2-digit'
+        }) + ' Uhr';
+      } catch {
+        return iso;
+      }
+    }
+
+    // Init
+    loadCurrentValue();
+  </script>
+</body>
+</html>
