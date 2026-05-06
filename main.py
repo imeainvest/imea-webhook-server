@@ -1,5 +1,5 @@
 """
-IMEA Webhook-Server v4.0.3
+IMEA Webhook-Server v4.0.4
 FastAPI · Railway.app
 Endpoints: lead-qualify, vermittlerprotokoll, gate-check, zulieferer, zins-update,
            objekt-intake (NEU v4.0)
@@ -34,6 +34,8 @@ logger = logging.getLogger("imea-webhook")
 # ── Startup: Whitelist automatisch befüllen ───────────────────────────────────
 KNOWN_ZULIEFERER = [
     {"email": "info@finest-invest.de",       "name": "Finest Invest",             "domain": "finest-invest.de"},
+    {"email": "angebote@finest-immo.de",      "name": "Finest Invest",             "domain": "finest-immo.de"},
+    {"email": "info@finest-immo.de",          "name": "Finest Invest",             "domain": "finest-immo.de"},
     {"email": "kontakt@finest-invest.de",    "name": "Finest Invest",             "domain": "finest-invest.de"},
     {"email": "falk.jaeger@finest-invest.de","name": "Falk Jäger",               "domain": "finest-invest.de"},
     {"email": "info@poller-immobilien.de",   "name": "Poller Immobilien",         "domain": "poller-immobilien.de"},
@@ -124,8 +126,8 @@ BAUJAHR_AFA_3PCT_AB  = 2023
 STAGE_EINGANG       = "stage_eingang"
 STAGE_WARTEN_STEFAN = "stage_warten_stefan"
 
-# Objekt-Intake Whitelist (in-memory, wird durch Bootstrap befüllt)
-_whitelist: Dict[str, dict] = {}
+# Objekt-Intake Whitelist (in-memory, beim Import mit Seeds befüllt)
+_whitelist: Dict[str, dict] = {z["email"]: z for z in KNOWN_ZULIEFERER}
 _processed_hashes: Dict[str, str] = {}
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1282,7 +1284,7 @@ async def ghl_proxy(path: str, request: Request):
 async def health():
     return {
         "status": "ok",
-        "version": "4.0.3",
+        "version": "4.0.4",
         "ghl_location": GHL_LOCATION_ID,
         "whitelist_count": len(_whitelist),
         "processed_count": len(_processed_hashes),
@@ -1292,4 +1294,4 @@ async def health():
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return {"service": "IMEA Webhook-Server", "version": "4.0.3", "status": "running"}
+    return {"service": "IMEA Webhook-Server", "version": "4.0.4", "status": "running"}
