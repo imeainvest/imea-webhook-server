@@ -1,5 +1,5 @@
 """
-IMEA Webhook-Server v4.0
+IMEA Webhook-Server v4.0.3
 FastAPI · Railway.app
 Endpoints: lead-qualify, vermittlerprotokoll, gate-check, zulieferer, zins-update,
            objekt-intake (NEU v4.0)
@@ -1282,7 +1282,7 @@ async def ghl_proxy(path: str, request: Request):
 async def health():
     return {
         "status": "ok",
-        "version": "4.0.0",
+        "version": "4.0.3",
         "ghl_location": GHL_LOCATION_ID,
         "whitelist_count": len(_whitelist),
         "processed_count": len(_processed_hashes),
@@ -1292,4 +1292,4 @@ async def health():
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return {"service": "IMEA Webhook-Server", "version": "4.0.0", "status": "running"}
+    return {"service": "IMEA Webhook-Server", "version": "4.0.3", "status": "running"}
