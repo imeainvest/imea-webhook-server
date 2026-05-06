@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
 import httpx
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -30,11 +31,42 @@ logging.basicConfig(
 logger = logging.getLogger("imea-webhook")
 
 # ── App ───────────────────────────────────────────────────────────────────────
+# ── Startup: Whitelist automatisch befüllen ───────────────────────────────────
+KNOWN_ZULIEFERER = [
+    {"email": "info@finest-invest.de",       "name": "Finest Invest",             "domain": "finest-invest.de"},
+    {"email": "kontakt@finest-invest.de",    "name": "Finest Invest",             "domain": "finest-invest.de"},
+    {"email": "falk.jaeger@finest-invest.de","name": "Falk Jäger",               "domain": "finest-invest.de"},
+    {"email": "info@poller-immobilien.de",   "name": "Poller Immobilien",         "domain": "poller-immobilien.de"},
+    {"email": "s.poller@poller-immobilien.de","name": "Sebastian Poller",         "domain": "poller-immobilien.de"},
+    {"email": "info@convista.de",            "name": "Convista",                  "domain": "convista.de"},
+    {"email": "objekte@convista.de",         "name": "Convista",                  "domain": "convista.de"},
+    {"email": "info@vonovia.de",             "name": "Vonovia",                   "domain": "vonovia.de"},
+    {"email": "verkauf@vonovia.de",          "name": "Vonovia",                   "domain": "vonovia.de"},
+    {"email": "info@deutsche-wohnen.de",     "name": "Deutsche Wohnen",           "domain": "deutsche-wohnen.de"},
+    {"email": "info@tag-immobilien.de",      "name": "TAG Immobilien",            "domain": "tag-immobilien.de"},
+    {"email": "info@adler-group.de",         "name": "Adler Group",               "domain": "adler-group.de"},
+    {"email": "immobilien@immonet.de",       "name": "Immonet",                   "domain": "immonet.de"},
+    {"email": "info@engel-voelkers.de",      "name": "Engel & Völkers",           "domain": "engel-voelkers.de"},
+    {"email": "info@remax.de",               "name": "RE/MAX",                    "domain": "remax.de"},
+    {"email": "sh@imea-finanz.de",           "name": "Stefan Happatz (Forward)",  "domain": "imea-finanz.de"},
+]
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup: Whitelist automatisch befüllen."""
+    for z in KNOWN_ZULIEFERER:
+        _whitelist[z["email"]] = z
+    logger.info(f"[STARTUP] Whitelist befüllt: {len(_whitelist)} Zulieferer")
+    yield
+    logger.info("[SHUTDOWN] IMEA Webhook-Server wird beendet.")
+
+
 app = FastAPI(
     title="IMEA Webhook-Server",
-    version="4.0.0",
+    version="4.0.1",
     docs_url=None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
