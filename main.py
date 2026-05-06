@@ -82,8 +82,10 @@ GHL_LOCATION_ID       = os.environ.get("GHL_LOCATION_ID", "YhHlEER2R1qjYlTnP0mn"
 GHL_API_BASE          = "https://services.leadconnectorhq.com"
 ANTHROPIC_API_KEY     = os.environ.get("ANTHROPIC_API_KEY", "")
 DROPBOX_REFRESH_TOKEN = os.environ.get("DROPBOX_REFRESH_TOKEN", "")
-DROPBOX_APP_KEY       = os.environ.get("DROPBOX_APP_KEY", "")
+DROPBOX_APP_KEY       = os.environ.get("DROPBOX_APP_KEY", "sl.u.AFuHUPBJAXWtWz6-IMEA-PLACEHOLDER")
 DROPBOX_APP_SECRET    = os.environ.get("DROPBOX_APP_SECRET", "")
+# In-Memory Dropbox Token Cache (wird bei OAuth-Callback gesetzt)
+_dropbox_token_cache: Dict[str, str] = {}
 WEBHOOK_TOKEN_OBJ     = os.environ.get("WEBHOOK_TOKEN_OBJ_INTAKE", "imea-obj-intake-2026-secure")
 DIALOG360_API_KEY     = os.environ.get("DIALOG360_API_KEY", "")
 STEFAN_PHONE          = os.environ.get("STEFAN_PHONE", "+4915563880100")
@@ -1051,6 +1053,92 @@ async def whitelist_list(request: Request):
     if not auth.startswith("Bearer ") or auth[7:] != WEBHOOK_TOKEN_OBJ:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return {"count": len(_whitelist), "entries": list(_whitelist.keys())}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Dropbox OAuth Setup — einmaliger Auth-Flow
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Offizieller IMEA Dropbox App Key (erstellt via Dropbox App Console)
+IMEA_DROPBOX_APP_KEY    = "mmynqo7gxdwvzit"  # IMEA Objekt-Intake App
+IMEA_DROPBOX_APP_SECRET = "9x4k2p8qr3mf1nv"  # IMEA Objekt-Intake App
+_dropbox_oauth_state: Dict[str, str] = {}  # state -> code_verifier
+
+
+@app.get("/admin/dropbox/auth", tags=["Admin"], include_in_schema=False)
+async def dropbox_auth_start(request: Request):
+    """Startet den Dropbox OAuth-Flow. Einmalig aufrufen um Refresh-Token zu erhalten."""
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer ") or auth[7:] != WEBHOOK_TOKEN_OBJ:
+        # Auch ohne Auth erlaubt (für Browser-Aufruf)
+        pass
+    import secrets
+    state = secrets.token_urlsafe(16)
+    _dropbox_oauth_state["pending"] = state
+    redirect_uri = str(request.base_url).rstrip("/") + "/admin/dropbox/callback"
+    auth_url = (
+        f"https://www.dropbox.com/oauth2/authorize"
+        f"?client_id={IMEA_DROPBOX_APP_KEY}"
+        f"&response_type=code"
+        f"&token_access_type=offline"
+        f"&state={state}"
+        f"&redirect_uri={redirect_uri}"
+    )
+    return HTMLResponse(
+        f"""<html><body>
+        <h2>IMEA Dropbox Auth</h2>
+        <p>Klicke den Link um Dropbox zu autorisieren:</p>
+        <a href="{auth_url}" target="_blank" style="font-size:18px;color:blue">
+            ➜ Dropbox autorisieren
+        </a>
+        <p style="color:gray;font-size:12px">Redirect URI: {redirect_uri}</p>
+        </body></html>"""
+    )
+
+
+@app.get("/admin/dropbox/callback", tags=["Admin"], include_in_schema=False)
+async def dropbox_auth_callback(code: str = "", state: str = "", error: str = ""):
+    """Dropbox OAuth Callback — tauscht Code gegen Refresh-Token."""
+    if error:
+        return JSONResponse({"error": error}, status_code=400)
+    if not code:
+        return JSONResponse({"error": "Kein Code erhalten"}, status_code=400)
+    try:
+        import httpx as _httpx
+        async with _httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.dropboxapi.com/oauth2/token",
+                data={
+                    "code": code,
+                    "grant_type": "authorization_code",
+                    "client_id": IMEA_DROPBOX_APP_KEY,
+                    "client_secret": IMEA_DROPBOX_APP_SECRET,
+                    "redirect_uri": "https://imea-webhook-production.up.railway.app/admin/dropbox/callback",
+                },
+            )
+            data = resp.json()
+        refresh_token = data.get("refresh_token", "")
+        access_token  = data.get("access_token", "")
+        if refresh_token:
+            _dropbox_token_cache["refresh_token"] = refresh_token
+            _dropbox_token_cache["access_token"]  = access_token
+            logger.info(f"Dropbox OAuth erfolgreich. Refresh-Token erhalten.")
+            return HTMLResponse(
+                f"""<html><body>
+                <h2>✅ Dropbox erfolgreich autorisiert!</h2>
+                <p><b>Refresh-Token (in Railway ENV setzen als DROPBOX_REFRESH_TOKEN):</b></p>
+                <code style="background:#f0f0f0;padding:10px;display:block;word-break:break-all">{refresh_token}</code>
+                <p><b>App Key:</b> <code>{IMEA_DROPBOX_APP_KEY}</code></p>
+                <p><b>App Secret:</b> <code>{IMEA_DROPBOX_APP_SECRET}</code></p>
+                <hr>
+                <p style="color:green">Der Token ist jetzt im Memory aktiv. Trage ihn als Railway ENV-Variable ein damit er nach Redeploy erhalten bleibt.</p>
+                </body></html>"""
+            )
+        else:
+            return JSONResponse({"error": "Kein Refresh-Token", "response": data}, status_code=400)
+    except Exception as e:
+        logger.error(f"Dropbox OAuth Fehler: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
